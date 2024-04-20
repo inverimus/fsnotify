@@ -50,7 +50,7 @@ when defined(windows):
       discard data.handle.closeHandle()
 
   proc getFileId(name: string): uint =
-    var x = newWideCString(name)
+    var x = WCHAR(newWideCString(name))
     result = uint getFileAttributesW(addr x)
 
   proc `name=`*(data: var PathEventData, name: string) =
