@@ -35,12 +35,12 @@ proc close*(data: PathEventData) =
 
 proc filecb*(data: var PathEventData) =
   if data.exists:
-    if fileExists(data.name):
+    try:
       let now = getLastModificationTime(data.name)
       if now != data.lastModificationTime:
         data.lastModificationTime = now
         call(data, @[initPathEvent(data.name, FileEventAction.Modify)])
-    else:
+    except:
       data.exists = false
       var event = initPathEvent(data.name, FileEventAction.Remove)
 

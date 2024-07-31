@@ -14,15 +14,15 @@ elif defined(macosx):
   export macpath
 
 type
-  Watcher* = object
+  Watcher* = ref object
     timer: Timer
     path: seq[PathEventData]
 
 
 proc initWatcher*(): Watcher =
-  discard
+  result = Watcher(timer: initTimer(), path: newSeq[PathEventData](0))
 
-proc register*(watcher: var Watcher, path: string, cb: EventCallback, 
+proc register*(watcher: Watcher, path: string, cb: EventCallback, 
                treatAsFile = false) =
   let idx = watcher.path.len
 
@@ -38,7 +38,6 @@ proc register*(watcher: var Watcher, path: string, cb: EventCallback,
 
   watcher.path.add pathData
 
-
   case pathData.kind
   of PathKind.File:
     var event = initTimerEvent(filecb, watcher.path[idx])
@@ -47,15 +46,15 @@ proc register*(watcher: var Watcher, path: string, cb: EventCallback,
     var event = initTimerEvent(dircb, watcher.path[idx])
     watcher.timer.add(event)
 
-proc register*(watcher: var Watcher, pathList: seq[string], cb: EventCallback,
+proc register*(watcher: Watcher, pathList: seq[string], cb: EventCallback,
                treatAsFile = false) =
   for path in pathList:
     watcher.register(path, cb, treatAsFile)
 
-template process*(watcher: var Watcher) =
+template process*(watcher: Watcher) =
   process(watcher.timer)
 
-proc poll*(watcher: var Watcher, ms = 100) =
+proc poll*(watcher: Watcher, ms = 100) =
   sleep(ms)
   process(watcher)
 
